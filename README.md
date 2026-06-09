@@ -58,11 +58,25 @@ curl -L https://github.com/likan/mcp-vtt/releases/latest/download/mcp-vtt-linux-
 
 添加到 Claude Desktop / Cursor / VS Code 的 MCP 配置：
 
+如果已把二进制放到 PATH 中：
+
 ```json
 {
   "mcpServers": {
     "mcp-vtt": {
       "command": "mcp-vtt"
+    }
+  }
+}
+```
+
+macOS 用户写完整路径：
+
+```json
+{
+  "mcpServers": {
+    "mcp-vtt": {
+      "command": "/usr/local/bin/mcp-vtt"
     }
   }
 }
@@ -75,6 +89,21 @@ Windows 用户写完整路径：
   "mcpServers": {
     "mcp-vtt": {
       "command": "C:\\Tools\\mcp-vtt.exe"
+    }
+  }
+}
+```
+
+opencode 配置（含 10 分钟超时）：
+
+```json
+{
+  "mcp": {
+    "mcp-vtt": {
+      "type": "local",
+      "command": ["/path/to/mcp-vtt"],
+      "timeout": 600000,
+      "enabled": true
     }
   }
 }
