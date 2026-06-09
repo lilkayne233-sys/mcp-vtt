@@ -1,6 +1,7 @@
-/my-vtt
-/my-vtt-*
+/mcp-vtt
+/mcp-vtt-*
 /models/
 *.mp3
 *.wav
 *.srt
+.opencode/
