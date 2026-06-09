@@ -10,13 +10,13 @@ import (
 	"time"
 )
 
-// modelsDir 默认 ~/.my-vtt/models，可通过 MODELS_DIR 环境变量覆盖。
+// modelsDir 默认 ~/.mcp-vtt/models，可通过 MODELS_DIR 环境变量覆盖。
 func modelsDir() string {
 	if d := os.Getenv("MODELS_DIR"); d != "" {
 		return d
 	}
 	home, _ := os.UserHomeDir()
-	return filepath.Join(home, ".my-vtt", "models")
+	return filepath.Join(home, ".mcp-vtt", "models")
 }
 
 const modelName = "ggml-tiny.bin"

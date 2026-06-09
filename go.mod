@@ -1,4 +1,4 @@
-module github.com/likan/my-vtt
+module github.com/likan/mcp-vtt
 
 go 1.26.3
 

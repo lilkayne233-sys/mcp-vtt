@@ -19,10 +19,10 @@ func defaultDir(envKey, fallback string) string {
 		return d
 	}
 	home, _ := os.UserHomeDir()
-	return filepath.Join(home, ".my-vtt", fallback)
+	return filepath.Join(home, ".mcp-vtt", fallback)
 }
 
-// DataDir 默认 ~/.my-vtt/data，可通过 DATA_DIR 环境变量覆盖。
+// DataDir 默认 ~/.mcp-vtt/data，可通过 DATA_DIR 环境变量覆盖。
 var DataDir = defaultDir("DATA_DIR", "data")
 
 func runCmd(ctx context.Context, name string, args ...string) (string, error) {

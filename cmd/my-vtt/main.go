@@ -12,20 +12,20 @@ import (
 	"github.com/mark3labs/mcp-go/mcp"
 	"github.com/mark3labs/mcp-go/server"
 
-	"github.com/likan/my-vtt/internal/downloader"
-	"github.com/likan/my-vtt/internal/transcriber"
+	"github.com/likan/mcp-vtt/internal/downloader"
+	"github.com/likan/mcp-vtt/internal/transcriber"
 )
 
 const modelURL = "https://hf-mirror.com/ggerganov/whisper.cpp/resolve/main/ggml-tiny.bin"
 
 func main() {
 	if len(os.Args) == 2 && os.Args[1] == "--version" {
-		fmt.Println("my-vtt 0.1.0")
+		fmt.Println("mcp-vtt 0.1.0")
 		return
 	}
 
 	s := server.NewMCPServer(
-		"my-vtt",
+		"mcp-vtt",
 		"0.1.0",
 		server.WithToolCapabilities(false),
 	)
@@ -130,7 +130,7 @@ func transcribeVideoHandler(ctx context.Context, req mcp.CallToolRequest) (*mcp.
 	transcriptsDir := os.Getenv("TRANSCRIPTS_DIR")
 	if transcriptsDir == "" {
 		home, _ := os.UserHomeDir()
-		transcriptsDir = filepath.Join(home, ".my-vtt", "transcripts")
+		transcriptsDir = filepath.Join(home, ".mcp-vtt", "transcripts")
 	}
 	os.MkdirAll(transcriptsDir, 0o755)
 	now := time.Now().Format(time.RFC3339)

@@ -1,2 +1,6 @@
 /my-vtt
 /my-vtt-*
+/models/
+*.mp3
+*.wav
+*.srt
