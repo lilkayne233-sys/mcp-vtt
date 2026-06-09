@@ -59,7 +59,7 @@ func ensureModel() error {
 		return nil
 	}
 
-	fmt.Fprintf(os.Stderr, "Downloading whisper.cpp tiny model to %s...\n", modelPath)
+	// silently download model, stderr would pollute MCP stdio
 	os.MkdirAll(filepath.Dir(modelPath), 0o755)
 
 	resp, err := http.Get(modelURL)
@@ -95,8 +95,8 @@ func ensureModel() error {
 	}
 	cleanup = false
 
-	fi, _ := os.Stat(modelPath)
-	fmt.Fprintf(os.Stderr, "Model downloaded: %s (%.1f MB)\n", modelPath, float64(fi.Size())/1e6)
+	_, _ = os.Stat(modelPath)
+	// model download complete
 	return nil
 }
 

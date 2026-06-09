@@ -11,12 +11,21 @@ import (
 )
 
 // modelsDir 默认 ~/.mcp-vtt/models，可通过 MODELS_DIR 环境变量覆盖。
+// 兼容旧路径 ~/.my-vtt/models：如果新路径不存在但旧路径有模型，优先使用旧路径。
 func modelsDir() string {
 	if d := os.Getenv("MODELS_DIR"); d != "" {
 		return d
 	}
 	home, _ := os.UserHomeDir()
-	return filepath.Join(home, ".mcp-vtt", "models")
+	newPath := filepath.Join(home, ".mcp-vtt", "models")
+	if _, err := os.Stat(filepath.Join(newPath, modelName)); err == nil {
+		return newPath
+	}
+	legacyPath := filepath.Join(home, ".my-vtt", "models")
+	if _, err := os.Stat(filepath.Join(legacyPath, modelName)); err == nil {
+		return legacyPath
+	}
+	return newPath
 }
 
 const modelName = "ggml-tiny.bin"
