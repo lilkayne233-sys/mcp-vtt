@@ -159,6 +159,34 @@ make dist
 
 处理流程：下载音频并转为 mp3 → whisper.cpp 直接转写 mp3 → 保存 `.md` + `.srt`
 
+## OpenCode Skill (视频总结)
+
+本项目还附带了一个 **OpenCode Skill**，在转写的基础上自动生成视频大纲和总结。
+
+### 安装
+
+```bash
+# 将 skill 目录拷贝到 OpenCode 的 skills 目录
+cp -r <mcp-vtt>/skill ~/.config/opencode/skills/vtt
+```
+
+或手动创建 `~/.config/opencode/skills/vtt/SKILL.md`，内容见同目录下的 `skill/SKILL.md`。
+
+### 流程
+
+1. `yt-dlp --print duration <url>` 获取视频时长
+2. 调用 `transcribe_video`（timestamps: false）获取转录文本
+3. 按 `ceil(时长秒 / 360) × 100` 字的目标长度生成大纲和连贯总结
+4. 忽略口播广告（除非广告就是主题）
+
+### 使用
+
+对 OpenCode 说：
+
+> 总结这个视频 https://www.bilibili.com/video/BV1JwEu6BEAU
+
+AI 会自动调用 skill 流程，先转录、再生成大纲和总结。
+
 ## License
 
 MIT
