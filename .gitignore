@@ -5,3 +5,5 @@
 *.wav
 *.srt
 .opencode/
+dist/
+.DS_Store

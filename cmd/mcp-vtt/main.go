@@ -16,7 +16,7 @@ import (
 	"github.com/likan/mcp-vtt/internal/transcriber"
 )
 
-const modelURL = "https://hf-mirror.com/ggerganov/whisper.cpp/resolve/main/ggml-tiny.bin"
+const modelURL = "https://hf-mirror.com/ggerganov/whisper.cpp/resolve/main/ggml-tiny-q5_1.bin"
 
 func main() {
 	if len(os.Args) == 2 && os.Args[1] == "--version" {
@@ -31,10 +31,10 @@ func main() {
 	)
 
 	s.AddTool(mcp.NewTool("transcribe_video",
-		mcp.WithDescription("下载视频音频并转写为文字。优先使用平台已有字幕，没有字幕时下载音频并用 whisper.cpp tiny 模型转写。"),
+		mcp.WithDescription("下载视频音频并用 whisper.cpp tiny 模型转写为文字。Bilibili 已适配请求头；其他 yt-dlp 支持的网站可尝试使用。"),
 		mcp.WithString("url",
 			mcp.Required(),
-			mcp.Description("视频链接，支持 Bilibili、YouTube 等 yt-dlp 可处理的平台"),
+			mcp.Description("视频链接，已测试 Bilibili，其他 yt-dlp 可处理的平台不做专门适配"),
 		),
 		mcp.WithBoolean("timestamps",
 			mcp.Description("是否在输出中包含时间戳 (SRT 格式)"),
@@ -108,25 +108,19 @@ func transcribeVideoHandler(ctx context.Context, req mcp.CallToolRequest) (*mcp.
 		timestamps = b
 	}
 
-	// 1. 优先拿已有字幕
-	subtitle, err := downloader.DownloadSubtitle(url)
-	if err == nil && subtitle != "" {
-		return mcp.NewToolResultText("[已有字幕]\n\n" + subtitle), nil
-	}
-
-	// 2. 下载音频
+	// 1. 下载音频
 	dl, err := downloader.DownloadAudio(url)
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("下载失败: %v", err)), nil
 	}
 
-	// 3. 转写
+	// 2. 转写
 	result, err := transcriber.Transcribe(dl.FilePath, timestamps)
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("转写失败: %v", err)), nil
 	}
 
-	// 4. 保存 transcripts
+	// 3. 保存 transcripts
 	transcriptsDir := os.Getenv("TRANSCRIPTS_DIR")
 	if transcriptsDir == "" {
 		home, _ := os.UserHomeDir()

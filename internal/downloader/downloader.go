@@ -12,6 +12,8 @@ import (
 	"regexp"
 	"strings"
 	"time"
+
+	"github.com/likan/mcp-vtt/internal/resolver"
 )
 
 func defaultDir(envKey, fallback string) string {
@@ -79,13 +81,17 @@ func ytBaseArgs(targetURL string) []string {
 	}
 	switch {
 	case strings.Contains(u.Host, "bilibili.com"):
-		return []string{"--add-header", "Referer:https://www.bilibili.com"}
+		// Bilibili requires Referer + Origin to avoid HTTP 412.
+		return []string{
+			"--add-header", "Referer:https://www.bilibili.com",
+			"--add-header", "Origin:https://www.bilibili.com",
+		}
 	default:
 		return nil
 	}
 }
 
-// videoIDRegex 提取 BVxxx 或 11 位 YouTube ID。
+// videoIDRegex 提取 BVxxx 或常见 11 位视频 ID。
 var videoIDRegex = regexp.MustCompile(`(BV\w+|[\w-]{11})`)
 
 // DownloadResult 下载结果。
@@ -96,12 +102,14 @@ type DownloadResult struct {
 }
 
 // DownloadAudio 下载视频最佳音频，转 mp3 64K。返回文件路径、标题和视频 ID。
+// Bilibili 已适配 Referer + Origin；其他 yt-dlp 支持的网站走通用参数。
 func DownloadAudio(url string) (*DownloadResult, error) {
 	url, _ = ResolveShortUrl(url)
 
 	// 获取标题
 	titleArgs := append(ytBaseArgs(url), "--print", "%(title)s", "--no-playlist", url)
-	title, err := runCmdTimeout("yt-dlp", titleArgs, 30*time.Second)
+	ytdlpPath := resolver.Resolve("yt-dlp")
+	title, err := runCmdTimeout(ytdlpPath, titleArgs, 30*time.Second)
 	if err != nil {
 		return nil, fmt.Errorf("get title: %w", err)
 	}
@@ -119,7 +127,7 @@ func DownloadAudio(url string) (*DownloadResult, error) {
 		"--print", "after_move:filepath",
 		url,
 	)
-	out, err := runCmdTimeout("yt-dlp", dlArgs, 300*time.Second)
+	out, err := runCmdTimeout(ytdlpPath, dlArgs, 300*time.Second)
 	if err != nil {
 		return nil, fmt.Errorf("download audio: %w", err)
 	}
@@ -136,78 +144,4 @@ func DownloadAudio(url string) (*DownloadResult, error) {
 	}
 
 	return &DownloadResult{FilePath: fp, Title: title, VideoID: vid}, nil
-}
-
-// DownloadSubtitle 下载平台已有字幕，清理时间戳后返回纯文本。无字幕返回空字符串。
-func DownloadSubtitle(url string) (string, error) {
-	url, _ = ResolveShortUrl(url)
-
-	outDir := filepath.Join(DataDir, "subs")
-	os.MkdirAll(outDir, 0o755)
-
-	// 获取 video ID
-	vidArgs := append(ytBaseArgs(url), "--print", "%(id)s", "--no-playlist", url)
-	vid, err := runCmdTimeout("yt-dlp", vidArgs, 30*time.Second)
-	if err != nil {
-		return "", fmt.Errorf("get video id: %w", err)
-	}
-
-	subArgs := append(ytBaseArgs(url),
-		"--write-auto-subs", "--write-subs",
-		"--sub-lang", "zh-Hans,zh-CN,zh,en",
-		"--sub-format", "srt/vtt/best",
-		"--skip-download",
-		"--output", filepath.Join(outDir, "%(id)s.%(ext)s"),
-		"--no-playlist",
-		url,
-	)
-	_, err = runCmdTimeout("yt-dlp", subArgs, 60*time.Second)
-	if err != nil {
-		return "", nil // no subtitles, not an error
-	}
-
-	for _, ext := range []string{"zh-Hans.srt", "zh-Hans.vtt"} {
-		p := filepath.Join(outDir, vid+"."+ext)
-		data, readErr := os.ReadFile(p)
-		if readErr != nil {
-			continue
-		}
-		cleaned := cleanSubtitle(string(data))
-		if len(cleaned) > 50 {
-			os.Remove(p)
-			return cleaned, nil
-		}
-	}
-	return "", nil
-}
-
-// cleanSubtitle 去除 SRT/VTT 时间戳、序号和元数据行。
-func cleanSubtitle(raw string) string {
-	var out []string
-	for _, line := range strings.Split(raw, "\n") {
-		trimmed := strings.TrimSpace(line)
-		if trimmed == "" {
-			out = append(out, trimmed)
-			continue
-		}
-		if regexp.MustCompile(`^\d+$`).MatchString(trimmed) {
-			continue
-		}
-		if strings.Contains(trimmed, "-->") {
-			continue
-		}
-		switch trimmed {
-		case "WEBVTT":
-			continue
-		}
-		if strings.HasPrefix(strings.ToUpper(trimmed), "NOTE") ||
-			strings.HasPrefix(strings.ToUpper(trimmed), "STYLE") ||
-			strings.HasPrefix(strings.ToUpper(trimmed), "REGION") {
-			continue
-		}
-		out = append(out, line)
-	}
-	result := strings.Join(out, "\n")
-	result = regexp.MustCompile(`\n{3,}`).ReplaceAllString(result, "\n\n")
-	return strings.TrimSpace(result)
 }
