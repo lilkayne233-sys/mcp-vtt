@@ -183,7 +183,7 @@ cp -r <mcp-vtt>/skill ~/.config/opencode/skills/vtt
 
 对 OpenCode 说：
 
-> 总结这个视频 https://www.bilibili.com/video/BV1JwEu6BEAU
+> 总结这个视频 https://www.bilibili.com/video/XXXXX
 
 AI 会自动调用 skill 流程，先转录、再生成大纲和总结。
 
