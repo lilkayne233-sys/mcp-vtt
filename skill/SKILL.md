@@ -5,12 +5,12 @@ description: 总结视频内容。用户发来视频链接要求总结/摘要时
 
 ## 流程
 
-1. 先用 `yt-dlp --print duration <url>` 获取视频时长（单位：秒）
-2. 调用 `mcp-vtt_transcribe_video`（timestamps: false）获取转录文本
+1. 调用 `mcp-vtt_transcribe_video`（timestamps: false）获取转录文本（会同时下载音频到 `~/.mcp-vtt/data/audio/<BV>.mp3`）
+2. 用 `ffprobe` 读取本地音频文件获取时长：`ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 <音频路径>`
 3. 根据时长计算目标字数：`Math.ceil(时长秒 / 360) × 100` 字（即每6分钟100字）
-3. 生成**大纲**：按主题分章节，每章一小标题 + 一句话核心
-4. 按大纲比例撰写**连贯总结**，不写成要点列表
-5. 忽略口播广告（除非广告本身就是视频主题）
+4. 生成**大纲**：按主题分章节，每章一小标题 + 一句话核心
+5. 按大纲比例撰写**连贯总结**，不写成要点列表
+6. 忽略口播广告（除非广告本身就是视频主题）
 
 ## 规则
 
