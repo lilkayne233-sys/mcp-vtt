@@ -24,7 +24,7 @@ description: 总结视频内容。用户发来视频链接要求总结/摘要时
 
 ### 2. 单视频流程
 
-1. 调用 `mcp-vtt_transcribe_video`（timestamps: false）获取转录文本（会同时下载音频到 `~/.mcp-vtt/data/audio/<BV>.mp3`）
+1. 调用 `mcp-vtt_transcribe_video`（timestamps: false）获取转录文本（会同时下载音频到 `~/.mcp-vtt/data/audio/<BV>.wav`）
 2. 用 `ffprobe` 读取本地音频文件获取时长：`ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 <音频路径>`
 3. 根据时长计算目标字数：大纲 `Math.ceil(时长秒 / 300) × 200` 字（每5分钟200字）+ 总结 `Math.ceil(时长秒 / 300) × 50` 字（每5分钟50字）
 4. 生成**大纲**：按主题分章节，两级目录
@@ -92,7 +92,7 @@ curl -s -c "%TEMP%\bili_cookies.txt" -H "User-Agent: Mozilla/5.0 (Windows NT 10.
 1. 调用 `mcp-vtt_transcribe_video`（timestamps: false）获取转录文本
 2. 用 `ffprobe` 读取音频时长：
    ```
-   ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 "C:\Users\LIKAN\.mcp-vtt\data\audio\<BV>.mp3"
+   ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 "C:\Users\LIKAN\.mcp-vtt\data\audio\<BV>.wav"
    ```
 3. **兜底检查**：如果音频时长 < 15 秒，判定为试听片段（疑似充电视频漏检），跳过
 4. 计算目标字数：大纲 `Math.ceil(时长秒 / 300) × 200` 字，总结 `Math.ceil(时长秒 / 300) × 50` 字

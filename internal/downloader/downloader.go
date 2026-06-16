@@ -101,7 +101,7 @@ type DownloadResult struct {
 	VideoID  string
 }
 
-// DownloadAudio 下载视频最佳音频，转 mp3 64K。返回文件路径、标题和视频 ID。
+// DownloadAudio 下载视频最佳音频，转为 Whisper 推荐 WAV。返回文件路径、标题和视频 ID。
 // Bilibili 已适配 Referer + Origin；其他 yt-dlp 支持的网站走通用参数。
 func DownloadAudio(url string) (*DownloadResult, error) {
 	url, _ = ResolveShortUrl(url)
@@ -120,8 +120,8 @@ func DownloadAudio(url string) (*DownloadResult, error) {
 
 	dlArgs := append(ytBaseArgs(url),
 		"-f", "bestaudio[ext=m4a]/bestaudio/best",
-		"-x", "--audio-format", "mp3",
-		"--audio-quality", "64K",
+		"-x", "--audio-format", "wav",
+		"--postprocessor-args", "ExtractAudio+ffmpeg_o:-ar 16000 -ac 1 -c:a pcm_s16le",
 		"--output", output,
 		"--no-playlist",
 		"--print", "after_move:filepath",

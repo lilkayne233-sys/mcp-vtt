@@ -40,6 +40,7 @@ func Transcribe(audioPath string, includeTimestamps bool) (*TranscriptResult, er
 	args := []string{
 		"-m", modelPath,
 		"-f", audioPath,
+		"-t", "8",
 		"-l", "zh",
 		"-otxt",
 		"-of", outBase,

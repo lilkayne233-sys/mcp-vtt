@@ -107,7 +107,7 @@ AI 会自动调用 `transcribe_video` 工具，返回转录文字。
 | 内容 | macOS | Windows | 说明 |
 |---|---|---|---|
 | whisper 模型 | 内嵌 `models/ggml-tiny-q5_1.bin` | 内嵌 `models\ggml-tiny-q5_1.bin` | 32MB 量化版，已内嵌 |
-| 下载的音频 | `~/.mcp-vtt/data/audio/` | `%USERPROFILE%\.mcp-vtt\data\audio\` | 临时文件，可手动清理 |
+| 下载的音频 | `~/.mcp-vtt/data/audio/` | `%USERPROFILE%\.mcp-vtt\data\audio\` | 16kHz mono WAV 临时文件，可手动清理 |
 | 转录结果 | `~/.mcp-vtt/transcripts/{id}.md` | `%USERPROFILE%\.mcp-vtt\transcripts\{id}.md` | Markdown 格式永久保存 |
 | 转录 SRT | `~/.mcp-vtt/transcripts/{id}.srt` | `%USERPROFILE%\.mcp-vtt\transcripts\{id}.srt` | 可选，带时间戳 |
 
@@ -157,7 +157,7 @@ make dist
 | `url` | string | 是 | 视频链接，已测试 Bilibili；其他 yt-dlp 支持的网站可尝试 |
 | `timestamps` | boolean | 否 | 是否生成 SRT 时间戳，默认 true |
 
-处理流程：下载音频并转为 mp3 → whisper.cpp 直接转写 mp3 → 保存 `.md` + `.srt`
+处理流程：下载音频并转为 16kHz mono WAV → whisper.cpp 直接转写 WAV → 保存 `.md` + `.srt`
 
 ## OpenCode Skill (视频总结)
 
